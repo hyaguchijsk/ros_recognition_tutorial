@@ -1,0 +1,5 @@
+site_name: ros recognition tutorial
+pages:
+- Home: index.md
+- Camera HowTo: camera.md
+theme: readthedocs
