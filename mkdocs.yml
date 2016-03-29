@@ -2,4 +2,6 @@ site_name: ros recognition tutorial
 pages:
 - Home: index.md
 - Camera HowTo: camera.md
+- How to use OpenCV: opencv.md
+- How to use PCL: pcl.md
 theme: readthedocs
