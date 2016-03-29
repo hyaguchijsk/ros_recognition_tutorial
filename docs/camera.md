@@ -54,7 +54,30 @@ TBD
 ### PlayStation Camera (ps4eye)
 
 PlayStation Cameraはステレオカメラです．
-`ps4eye`というパッケージを使います．
+USB3.0のコネクタへの改造が必要なほか，
+カーネルのバージョンやUSBホストのチップとの相性があります．
+取り扱うためには[ps4eye]というパッケージを使います．
+
+`{catkin_workspace}/src`以下で，
+```
+wstool set ps4eye https://github.com/longjie/ps4eye.git
+```
+
+としてパッケージを取得し，
+
+```
+catkin build ps4eye
+source ~/.bashrc
+```
+
+でパッケージをビルドして認識させます．
+次に，udevの設定を追加してカメラを認識できるようにします．
+
+```
+rosrun ps4eye create_udev_rules
+```
+
+起動するときは以下のようにします．
 
 ```
 roslaunch ps4eye stereo.launch
@@ -70,11 +93,57 @@ roslaunch ps4eye stereo.launch
 
 カメラ画像の場合，`image_view`を使って画像の内容を見ることができます．
 
+```
+rosrun image_view image_view image:={topic name}
+```
+
 三次元点群の場合は`rviz`を使いましょう．
+
+```
+rosrun rviz rviz
+```
+
+して，
+`Global Option`の`Fixed Frame`をカメラとつながっているフレームにし，
+`Add -> By Topic -> PointCloud2`を追加して，
+`Topic`を変更することで表示することができます．
+
 
 
 ## Camera calibration
 
+カメラを使いはじめるときは，キャリブレーションが必要です．
+キャリブレーションでは，焦点距離などの内部パラメータ推定，歪み補正，
+ステレオなど複数台のカメラ間やロボットに対する
+カメラの位置姿勢を求める外部パラメータ推定を行います．
+[ROS Camera Calibration Tutorials]を参照してください．
+
+（カメラによっては工場出荷状態でキャリブレーションされているものもあります．）
+
+
 ### Monocular camera
 
+単一のカメラでは，内部パラメータ推定と歪み補正を行います．
+[How to Calibrate a Monocular Camera]を参照してください．
+
 ### Stereo camera
+
+ステレオカメラでは，それぞれのカメラでのキャリブレーションに加えて
+外部パラメータ推定と平行化を行います．
+[How to Calibrate a Stereo Camera]を参照してください．
+
+### Calibrated Images
+
+カメラキャリブレーションを行った場合の注意点として，
+カメラから受け取った生のカメラ画像は
+`/{camera_name}/image_raw`に出力されますが，
+キャリブレーションされた画像は
+`{camera_name}/image_rect_color`に出力されます．
+`{camera_name}/camera_info`の中にはキャリブレーションによって求められた
+内部パラメータや歪み補正の値が含まれています．
+
+
+[ps4eye]: https://github.com/longjie/ps4eye
+[ROS Camera Calibration Tutorials]:  http://wiki.ros.org/camera_calibration/Tutorials
+[How to Calibrate a Monocular Camera]: http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration
+[How to Calibrate a Stereo Camera]: http://wiki.ros.org/camera_calibration/Tutorials/StereoCalibration
