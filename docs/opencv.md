@@ -4,18 +4,15 @@
 
 [opencv_apps]にOpenCVを使ったROSパッケージのサンプルがあります．
 
-## cv_bridge
+## image_transport and cv_bridge
 
-ROSのメッセージをOpenCVの型に変換するには[cv_bridge]を使います．
-C++のチュートリアルは[Converting between ROS images and OpenCV images (C++)]
+`Image`型を取り扱うためには[image_transport]を，
+ROSのメッセージとOpenCVの型を変換するには[cv_bridge]を使います．
+C++のチュートリアルは
+[image_transport/Tutorials]
+と
+[Converting between ROS images and OpenCV images (C++)]
 に詳細記述があります．
-
-## How to synchronize image and camera_info
-
-`image`と`camera_info`は対になって扱われる必要があるため，
-時刻同期をとって，単一のサブスクライバ内で扱えると便利です．
-このための機能が[message_filters]に用意されています．
-リンク先のチュートリアルがまさにそのものです．
 
 ## Camera Parameters
 
@@ -60,7 +57,41 @@ roi:
 （ちなみにこれは左目側で，右目側`P[3]`にはベースライン距離が入ります．）
 
 
+## How to synchronize image and camera_info
+
+`image`と`camera_info`は対になって扱われる必要があるため，
+時刻同期をとって，単一のサブスクライバ内で扱えると便利です．
+このための機能が[message_filters]に用意されています．
+
+### CameraSubscriber
+
+`image_transport::CameraSubscriber`が一番簡単に記述できる方法です．
+
+```
+void ImageCallback(
+  const sensor_msgs::ImageConstPtr& image_msg,
+  const sensor_msgs::CameraInfoConstPtr& info_msg) {
+  // do something;
+}
+```
+
+を宣言しておき，
+
+```
+ros::NodeHandle handle;
+image_transport::ImageTransport it(handle);
+
+image_transport::CameraSubscriber sub_camera_ =
+  it_.subscribeCamera("image", 1, ImageCallback);
+```
+
+とすることで，同期された２つのメッセージを扱うことができます．
+
+
+
 [opencv_apps]: http://wiki.ros.org/opencv_apps
+[image_transport]: http://wiki.ros.org/image_transport
 [cv_bridge]: http://wiki.ros.org/cv_bridge
+[image_transport/Tutorials]: http://wiki.ros.org/image_transport/Tutorials
 [Converting between ROS images and OpenCV images (C++)]: http://wiki.ros.org/cv_bridge/Tutorials/UsingCvBridgeToConvertBetweenROSImagesAndOpenCVImages
 [message_filters]: http://wiki.ros.org/message_filters
